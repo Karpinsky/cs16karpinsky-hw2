@@ -1,6 +1,6 @@
 package main.java.ua.edu.ucu.collections.immutable;
 
-final public class ImmutableArrayList implements ImmutableList {
+public class ImmutableArrayList implements ImmutableList {
 
     private Object[] elements;
 

@@ -1,6 +1,6 @@
 package main.java.ua.edu.ucu.collections.immutable;
 
-final public class ImmutableLinkedList implements ImmutableList {
+public class ImmutableLinkedList implements ImmutableList {
 
     private int count = 0;
 
@@ -80,6 +80,16 @@ final public class ImmutableLinkedList implements ImmutableList {
 
     @Override
     public ImmutableList add(int index, Object e) {
+        if (index == 0)
+        {
+            Node newEl = new Node(e);
+            newEl.next = this.rootNode;
+            this.rootNode.previous = newEl;
+            this.rootNode = newEl;
+
+            return new ImmutableLinkedList(this.rootNode);
+        }
+
         Node keyElement = this.getNode(index);
         if (keyElement == null)
         {
@@ -108,6 +118,25 @@ final public class ImmutableLinkedList implements ImmutableList {
 
     @Override
     public ImmutableList addAll(int index, Object[] c) {
+        if (index == 0)
+        {
+            Node currentNode = new Node(c[0]);
+            Node cashedFirst = currentNode;
+            for (int i = 1; i < c.length; ++i)
+            {
+                currentNode.next = new Node(c[i]);
+                currentNode.next.previous = currentNode;
+                currentNode = currentNode.next;
+            }
+            currentNode.next = this.rootNode;
+            this.rootNode.previous = currentNode;
+            this.rootNode = cashedFirst;
+
+            this.count += c.length;
+
+            return new ImmutableLinkedList(this.rootNode);
+        }
+
         Node keyElement = this.getNode(index);
         if (keyElement == null)
         {
@@ -123,6 +152,8 @@ final public class ImmutableLinkedList implements ImmutableList {
         }
         currentNode.next = keyElement;
         keyElement.previous = currentNode;
+
+        this.count += c.length;
 
         return new ImmutableLinkedList(this.rootNode);
     }
@@ -187,14 +218,40 @@ final public class ImmutableLinkedList implements ImmutableList {
 
     @Override
     public ImmutableList remove(int index) {
-        Node removeElement = this.getNode(index);
-
-        if (removeElement != null)
+        if (index == 0)
         {
-            removeElement.previous.next = removeElement.next;
-            removeElement.next.previous = removeElement.previous;
-            removeElement = null;
+            if (this.rootNode.next != null) {
+                this.rootNode = this.rootNode.next;
+                this.rootNode.previous = null;
+            }
+            else {
+                this.rootNode = null;
+                this.pivotNode = null;
+            }
             this.count--;
+        }
+        else if (index == this.count - 1)
+        {
+            if (this.pivotNode.previous != null) {
+                this.pivotNode = this.pivotNode.previous;
+                this.pivotNode.next = null;
+            }
+            else {
+                this.rootNode = null;
+                this.pivotNode = null;
+            }
+            this.count--;
+        }
+        else
+        {
+            Node removeElement = this.getNode(index);
+            if (removeElement != null)
+            {
+                removeElement.previous.next = removeElement.next;
+                removeElement.next.previous = removeElement.previous;
+                removeElement = null;
+                this.count--;
+            }
         }
 
         return new ImmutableLinkedList(this.rootNode);
