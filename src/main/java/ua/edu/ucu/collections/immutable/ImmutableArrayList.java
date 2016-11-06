@@ -1,84 +1,86 @@
 package main.java.ua.edu.ucu.collections.immutable;
 
-public class ImmutableArrayList implements ImmutableList {
+import java.util.Arrays;
 
-    private Object[] elements;
+public class ImmutableArrayList<T> implements ImmutableList<T> {
+
+    private T[] elements;
 
     public ImmutableArrayList()
     {
-        this.elements = new Object[0];
+        this.elements = (T[]) new Object[0];
     }
 
-    public ImmutableArrayList(Object[] initialArray)
+    public ImmutableArrayList(T[] initialArray)
     {
         this.elements = initialArray;
     }
 
     @Override
-    public ImmutableList add(Object e) {
-        Object[] newArray = new Object[this.elements.length + 1];
+    public ImmutableArrayList<T> add(T e) {
+        T[] newArray = (T[]) new Object[this.elements.length + 1];
         newArray[this.elements.length] = e;
 
         System.arraycopy(this.elements, 0, newArray, 0, this.elements.length);
 
-        return new ImmutableArrayList(newArray);
+        return new ImmutableArrayList<T>(newArray);
     }
 
     @Override
-    public ImmutableList add(int index, Object e) {
-        Object[] newArray = new Object[this.elements.length + 1];
+    public ImmutableArrayList<T> add(int index, T e) {
+        T[] newArray = (T[]) new Object[this.elements.length + 1];
         newArray[index] = e;
 
         System.arraycopy(this.elements, 0, newArray, 0, index);
         System.arraycopy(this.elements, index, newArray, index + 1, this.elements.length - index);
 
-        return new ImmutableArrayList(newArray);
+        return new ImmutableArrayList<T>(newArray);
     }
 
     @Override
-    public ImmutableList addAll(Object[] c) {
-        Object[] newArray = new Object[this.elements.length + c.length];
+    public ImmutableArrayList<T> addAll(T[] c) {
+        T[] newArray = (T[]) new Object[this.elements.length + c.length];
 
         System.arraycopy(this.elements, 0, newArray, 0, this.elements.length);
         System.arraycopy(c, 0, newArray, this.elements.length, c.length);
 
-        return new ImmutableArrayList(newArray);
+        return new ImmutableArrayList<T>(newArray);
     }
 
     @Override
-    public ImmutableList addAll(int index, Object[] c) {
-        Object[] newArray = new Object[this.elements.length + c.length];
+    public ImmutableArrayList<T> addAll(int index, T[] c) {
+        T[] newArray = (T[]) new Object[this.elements.length + c.length];
 
         System.arraycopy(this.elements, 0, newArray, 0, index);
         System.arraycopy(c, 0, newArray, index, c.length);
         System.arraycopy(this.elements, index, newArray, index + c.length, this.elements.length - index);
 
-        return new ImmutableArrayList(newArray);
+        return new ImmutableArrayList<T>(newArray);
     }
 
     @Override
-    public Object get(int index) {
+    public T get(int index) {
         return this.elements[index];
     }
 
     @Override
-    public ImmutableList remove(int index) {
-        Object[] newArray = new Object[this.elements.length - 1];
+    public ImmutableArrayList<T> remove(int index) {
+        T[] newArray = (T[]) new Object[this.elements.length - 1];
 
         System.arraycopy(this.elements, 0, newArray, 0, index);
         System.arraycopy(this.elements, index + 1, newArray, index, newArray.length - index);
 
-        return new ImmutableArrayList(newArray);
+        return new ImmutableArrayList<T>(newArray);
     }
 
     @Override
-    public ImmutableList set(int index, Object e) {
+    public ImmutableArrayList<T> set(int index, T e) {
         this.elements[index] = e;
-        return new ImmutableArrayList(this.elements);
+        return new ImmutableArrayList<T>(this.elements);
     }
 
     @Override
-    public int indexOf(Object e) {
+    public int indexOf(T e) {
         for (int i = 0; i < this.elements.length; ++i)
         {
             if (this.elements[i] == e)
@@ -96,8 +98,8 @@ public class ImmutableArrayList implements ImmutableList {
     }
 
     @Override
-    public ImmutableList clear() {
-        return new ImmutableArrayList();
+    public ImmutableArrayList<T> clear() {
+        return new ImmutableArrayList<T>();
     }
 
     @Override
@@ -106,7 +108,13 @@ public class ImmutableArrayList implements ImmutableList {
     }
 
     @Override
-    public Object[] toArray() {
+    public T[] toArray() {
         return this.elements;
+    }
+
+    @Override
+    public String toString()
+    {
+        return Arrays.toString(this.elements);
     }
 }

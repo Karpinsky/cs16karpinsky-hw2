@@ -1,14 +1,16 @@
 package main.java.ua.edu.ucu.collections.immutable;
 
-public class Node {
+public class Node<T> implements Cloneable{
 
-    public Object data;
-    public Node next = null;
-    public Node previous = null;
+    public final T data;
+    public Node<T> next;
+    public Node<T> previous;
 
-    public Node(Object dataC)
+    public Node(T dataC)
     {
         this.data = dataC;
+        this.next = null;
+        this.previous = null;
     }
 
 }

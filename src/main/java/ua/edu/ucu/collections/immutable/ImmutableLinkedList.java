@@ -1,32 +1,32 @@
 package main.java.ua.edu.ucu.collections.immutable;
 
-public class ImmutableLinkedList implements ImmutableList {
+public class ImmutableLinkedList<T> implements ImmutableList<T> {
 
-    private int count = 0;
+    private final int count;
 
-    private Node rootNode;
-    private Node pivotNode;
+    private final Node<T> rootNode;
+    private final Node<T> pivotNode;
 
 
     public ImmutableLinkedList()
     {
-        rootNode = null;
-        pivotNode = null;
+        this.rootNode = null;
+        this.pivotNode = null;
         this.count = 0;
     }
 
-    public ImmutableLinkedList(Object rootData)
+    public ImmutableLinkedList(T rootData)
     {
-        rootNode = null;
-        pivotNode = null;
+        this.rootNode = null;
+        this.pivotNode = null;
         this.count = 0;
         this.add(rootData);
     }
 
-    public ImmutableLinkedList(Object[] initialArray)
+    public ImmutableLinkedList(T[] initialArray)
     {
-        rootNode = null;
-        pivotNode = null;
+        this.rootNode = null;
+        this.pivotNode = null;
         this.count = 0;
         for (int i = 0; i < initialArray.length; ++i)
         {
@@ -34,255 +34,349 @@ public class ImmutableLinkedList implements ImmutableList {
         }
     }
 
-    private ImmutableLinkedList(Node root)
+    private ImmutableLinkedList(Node<T> root, Node<T> pivot, int count)
     {
-        int counter = 0;
         this.rootNode = root;
-
-        Node loopNode = this.rootNode;
-        if (loopNode != null)
-        {
-            counter++;
-            while (loopNode.next != null)
-            {
-                loopNode = loopNode.next;
-                counter++;
-            }
-        }
-
-        this.count = counter;
-        this.pivotNode = loopNode;
+        this.pivotNode = pivot;
+        this.count = count;
     }
 
-    public ImmutableList addFirst(Object e)
+    public ImmutableLinkedList<T> addFirst(T e)
     {
         return this.add(0, e);
     }
 
     @Override
-    public ImmutableList add(Object e) {
+    public ImmutableLinkedList<T> add(T e)
+    {
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
         if (this.rootNode == null)
         {
-            this.rootNode = new Node(e);
-            this.pivotNode = this.rootNode;
+            newRootNode = new Node<T>(e);
+            newPivotNode = newRootNode;
         }
         else
         {
-            this.pivotNode.next = new Node(e);
-            this.pivotNode.next.previous = this.pivotNode;
-            this.pivotNode = this.pivotNode.next;
-        }
+            newRootNode = new Node<T>(this.rootNode.data);
+            Node<T> newCurrentNode = newRootNode;
+            Node<T> currentNode = this.rootNode;
 
-        this.count++;
-
-        return new ImmutableLinkedList(this.rootNode);
-    }
-
-    @Override
-    public ImmutableList add(int index, Object e) {
-        if (index == 0)
-        {
-            Node newEl = new Node(e);
-            newEl.next = this.rootNode;
-            this.rootNode.previous = newEl;
-            this.rootNode = newEl;
-
-            return new ImmutableLinkedList(this.rootNode);
-        }
-
-        Node keyElement = this.getNode(index);
-        if (keyElement == null)
-        {
-            return this.add(e);
-        }
-
-        keyElement.previous.next = new Node(e);
-        keyElement.previous.next.previous = keyElement.previous;
-        keyElement.previous.next.next = keyElement;
-        keyElement.previous = keyElement.previous.next;
-
-        this.count++;
-
-        return new ImmutableLinkedList(this.rootNode);
-    }
-
-    @Override
-    public ImmutableList addAll(Object[] c) {
-        for (int i = 0; i < c.length; ++i)
-        {
-            this.add(c[i]);
-        }
-
-        return new ImmutableLinkedList(this.rootNode);
-    }
-
-    @Override
-    public ImmutableList addAll(int index, Object[] c) {
-        if (index == 0)
-        {
-            Node currentNode = new Node(c[0]);
-            Node cashedFirst = currentNode;
-            for (int i = 1; i < c.length; ++i)
+            while (currentNode.next != null)
             {
-                currentNode.next = new Node(c[i]);
-                currentNode.next.previous = currentNode;
+                currentNode = currentNode.next;
+                newCurrentNode.next = new Node<T>(currentNode.data);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+            newPivotNode = newCurrentNode;
+            newPivotNode.next = new Node<T>(e);
+            newPivotNode.next.previous = newPivotNode;
+            newPivotNode = newPivotNode.next;
+        }
+
+        return new ImmutableLinkedList<T>(newRootNode, newPivotNode, this.count + 1);
+    }
+
+    @Override
+    public ImmutableLinkedList<T> add(int index, T e)
+    {
+        if (index != 0 && (this.isEmpty() || index >= this.count))
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
+        if (index == 0) {
+            newRootNode = new Node<T>(e);
+            Node<T> newCurrentNode = newRootNode;
+            Node<T> currentNode = this.rootNode;
+
+            while (currentNode != null)
+            {
+                newCurrentNode.next = new Node<T>(currentNode.data);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
                 currentNode = currentNode.next;
             }
-            currentNode.next = this.rootNode;
-            this.rootNode.previous = currentNode;
-            this.rootNode = cashedFirst;
-
-            this.count += c.length;
-
-            return new ImmutableLinkedList(this.rootNode);
+            newPivotNode = newCurrentNode;
         }
-
-        Node keyElement = this.getNode(index);
-        if (keyElement == null)
+        else
         {
-            return this.addAll(c);
+            newRootNode = new Node<T>(this.rootNode.data);
+            Node<T> newCurrentNode = newRootNode;
+            Node<T> currentNode = this.rootNode;
+
+            int ndx = 0;
+            while (currentNode.next != null)
+            {
+                if (ndx == index)
+                {
+                    newCurrentNode.next = new Node<T>(e);
+                    newCurrentNode.next.previous = newCurrentNode;
+                    newCurrentNode = newCurrentNode.next;
+                }
+                ndx++;
+                currentNode = currentNode.next;
+                newCurrentNode.next = new Node<T>(currentNode.data);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+            newPivotNode = newCurrentNode;
         }
 
-        Node currentNode = keyElement.previous;
-        for (int i = 0; i < c.length; ++i)
-        {
-            currentNode.next = new Node(c[i]);
-            currentNode.next.previous = currentNode;
-            currentNode = currentNode.next;
-        }
-        currentNode.next = keyElement;
-        keyElement.previous = currentNode;
-
-        this.count += c.length;
-
-        return new ImmutableLinkedList(this.rootNode);
+        return new ImmutableLinkedList<T>(newRootNode, newPivotNode, this.count + 1);
     }
 
-    public Object getFirst()
+    @Override
+    public ImmutableLinkedList<T> addAll(T[] c)
+    {
+        if (c.length < 1)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
+        if (this.rootNode == null)
+        {
+            newRootNode = new Node<T>(c[0]);
+            Node<T> newCurrentNode = newRootNode;
+            for (int i = 1; i < c.length; ++i)
+            {
+                newCurrentNode.next = new Node<T>(c[i]);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+            newPivotNode = newCurrentNode;
+        }
+        else
+        {
+            newRootNode = new Node<T>(this.rootNode.data);
+            Node<T> newCurrentNode = newRootNode;
+            Node<T> currentNode = this.rootNode;
+
+            while (currentNode.next != null)
+            {
+                currentNode = currentNode.next;
+                newCurrentNode.next = new Node<T>(currentNode.data);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+
+            for (int i = 0; i < c.length; ++i)
+            {
+                newCurrentNode.next = new Node<T>(c[i]);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+
+            newPivotNode = newCurrentNode;
+        }
+
+        return new ImmutableLinkedList<T>(newRootNode, newPivotNode, this.count + c.length);
+    }
+
+    @Override
+    public ImmutableLinkedList<T> addAll(int index, T[] c) {
+        if ((index != 0 && (this.isEmpty() || index >= this.count)) || c.length < 1)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
+        if (index == 0) {
+            newRootNode = new Node<T>(c[0]);
+            Node<T> newCurrentNode = newRootNode;
+
+            for (int i = 1; i < c.length; ++i)
+            {
+                newCurrentNode.next = new Node<T>(c[i]);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+
+            Node<T> currentNode = this.rootNode;
+
+            while (currentNode != null)
+            {
+                newCurrentNode.next = new Node<T>(currentNode.data);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+                currentNode = currentNode.next;
+            }
+            newPivotNode = newCurrentNode;
+        }
+        else
+        {
+            newRootNode = new Node<T>(this.rootNode.data);
+            Node<T> newCurrentNode = newRootNode;
+            Node<T> currentNode = this.rootNode;
+
+            int ndx = 0;
+            while (currentNode.next != null)
+            {
+                if (ndx == index)
+                {
+                    for (int i = 0; i < c.length; ++i)
+                    {
+                        newCurrentNode.next = new Node<T>(c[i]);
+                        newCurrentNode.next.previous = newCurrentNode;
+                        newCurrentNode = newCurrentNode.next;
+                    }
+                }
+                ndx++;
+                currentNode = currentNode.next;
+                newCurrentNode.next = new Node<T>(currentNode.data);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+            }
+            newPivotNode = newCurrentNode;
+        }
+
+        return new ImmutableLinkedList<T>(newRootNode, newPivotNode, this.count + c.length);
+    }
+
+    public T getFirst()
     {
        return this.rootNode.data;
     }
 
-    public Object getLast()
+    public T getLast()
     {
         return this.pivotNode.data;
     }
 
-    private Node getNode(int index)
+    private Node<T> getNode(int index)
     {
-        int ndx = 0;
-
-        if (this.isEmpty())
+        if (this.isEmpty() || index >= this.count)
         {
-            return null;
+            throw new IndexOutOfBoundsException();
         }
 
-        Node currentNode = this.rootNode;
+        int ndx = 0;
+        Node<T> currentNode = this.rootNode;
         while (ndx < index && currentNode.next != null)
         {
             ndx++;
             currentNode = currentNode.next;
         }
 
-        return ndx == index ? currentNode : null;
+        return currentNode;
     }
 
     @Override
-    public Object get(int index) {
-        int ndx = 0;
-
-        if (this.isEmpty())
-        {
-            return null;
-        }
-
-        Node currentNode = this.rootNode;
-        while (ndx < index && currentNode.next != null)
-        {
-            ndx++;
-            currentNode = currentNode.next;
-        }
-
-        return ndx == index ? currentNode.data : null;
+    public T get(int index)
+    {
+        return this.getNode(index).data;
     }
 
-    public ImmutableList removeFirst()
+    public ImmutableLinkedList<T> removeFirst()
     {
         return this.remove(0);
     }
 
-    public ImmutableList removeLast()
+    public ImmutableLinkedList<T> removeLast()
     {
         return this.remove(this.count - 1);
     }
 
     @Override
-    public ImmutableList remove(int index) {
+    public ImmutableLinkedList<T> remove(int index)
+    {
+        if (this.isEmpty() || index >= this.count)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
+        newRootNode = new Node<T>(this.rootNode.data);
+        Node<T> currentNode = this.rootNode;
+
         if (index == 0)
         {
-            if (this.rootNode.next != null) {
-                this.rootNode = this.rootNode.next;
-                this.rootNode.previous = null;
-            }
-            else {
-                this.rootNode = null;
-                this.pivotNode = null;
-            }
-            this.count--;
+            newRootNode = new Node<T>(currentNode.next.data);
+            currentNode = currentNode.next;
         }
-        else if (index == this.count - 1)
+        Node<T> newCurrentNode = newRootNode;
+
+        int ndx = 1;
+        while (currentNode.next != null)
         {
-            if (this.pivotNode.previous != null) {
-                this.pivotNode = this.pivotNode.previous;
-                this.pivotNode.next = null;
-            }
-            else {
-                this.rootNode = null;
-                this.pivotNode = null;
-            }
-            this.count--;
-        }
-        else
-        {
-            Node removeElement = this.getNode(index);
-            if (removeElement != null)
+            if (ndx == index)
             {
-                removeElement.previous.next = removeElement.next;
-                removeElement.next.previous = removeElement.previous;
-                removeElement = null;
-                this.count--;
+                currentNode = currentNode.next;
+                ndx++;
+                continue;
             }
+            ndx++;
+            currentNode = currentNode.next;
+            newCurrentNode.next = new Node<T>(currentNode.data);
+            newCurrentNode.next.previous = newCurrentNode;
+            newCurrentNode = newCurrentNode.next;
         }
+        newPivotNode = newCurrentNode;
 
-        return new ImmutableLinkedList(this.rootNode);
+        return new ImmutableLinkedList<T>(newRootNode, newPivotNode, this.count - 1);
     }
 
     @Override
-    public ImmutableList set(int index, Object e) {
-        Node setElement = this.getNode(index);
-        if (setElement != null)
+    public ImmutableLinkedList<T> set(int index, T e) {
+        Node<T> setElement = new Node<T>(e);
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
+        newRootNode = new Node<T>(this.rootNode.data);
+        Node<T> newCurrentNode = newRootNode;
+        Node<T> currentNode = this.rootNode;
+
+        int ndx = 0;
+        while (currentNode.next != null)
         {
-            setElement.data = e;
+            if (ndx == index)
+            {
+                setElement.next = newCurrentNode.next;
+                setElement.previous = newCurrentNode.previous;
+                newCurrentNode = new Node<T>(setElement.data);
+                newCurrentNode.next = setElement.next;
+                newCurrentNode.previous = setElement.previous;
+                setElement.next = null;
+                setElement.previous = null;
+            }
+            ndx++;
+            currentNode = currentNode.next;
+            newCurrentNode.next = new Node<T>(currentNode.data);
+            newCurrentNode.next.previous = newCurrentNode;
+            newCurrentNode = newCurrentNode.next;
         }
+        newPivotNode = newCurrentNode;
 
-        return new ImmutableLinkedList(this.rootNode);
+        return new ImmutableLinkedList<T>(newRootNode, newPivotNode, this.count);
     }
 
     @Override
-    public int indexOf(Object e) {
+    public int indexOf(T e) {
         int ndx = 0;
 
-        Node currentNode = this.rootNode;
-        if (currentNode != null)
+        Node<T> currentNode = this.rootNode;
+        for (int i = 0; i < this.count; ++i)
         {
-            while (currentNode.next != null)
+            if (currentNode.data == e)
             {
-                ndx++;
-                currentNode = currentNode.next;
+                return ndx;
             }
-
-            return ndx;
+            ndx++;
+            currentNode = currentNode.next;
         }
+
         return -1;
     }
 
@@ -302,22 +396,31 @@ public class ImmutableLinkedList implements ImmutableList {
     }
 
     @Override
-    public Object[] toArray() {
-        Object[] returnArray = new Object[this.count];
+    public T[] toArray() {
+        T[] returnArray = (T[]) new Object[this.count];
 
-        if (this.rootNode != null)
+        Node<T> currentNode = this.rootNode;
+        for (int i = 0; i < this.count; ++i)
         {
-            int i = 0;
-            Node currentNode = this.rootNode;
             returnArray[i] = currentNode.data;
-            while (currentNode.next != null)
-            {
-                currentNode = currentNode.next;
-                i++;
-                returnArray[i] = currentNode.data;
-            }
+            currentNode = currentNode.next;
         }
 
         return returnArray;
+    }
+
+    @Override
+    public String toString()
+    {
+        Node currentNode = this.rootNode;
+
+        String s = "";
+        while (currentNode != null)
+        {
+            s += currentNode.data.toString() + " -> ";
+            currentNode = currentNode.next;
+        }
+
+        return s + "null";
     }
 }
