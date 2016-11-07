@@ -28,6 +28,11 @@ public class ImmutableArrayList<T> implements ImmutableList<T> {
 
     @Override
     public ImmutableArrayList<T> add(int index, T e) {
+        if (index != 0 && (this.isEmpty() || index >= this.elements.length))
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
         T[] newArray = (T[]) new Object[this.elements.length + 1];
         newArray[index] = e;
 
@@ -49,6 +54,11 @@ public class ImmutableArrayList<T> implements ImmutableList<T> {
 
     @Override
     public ImmutableArrayList<T> addAll(int index, T[] c) {
+        if (index != 0 && (this.isEmpty() || index >= this.elements.length))
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
         T[] newArray = (T[]) new Object[this.elements.length + c.length];
 
         System.arraycopy(this.elements, 0, newArray, 0, index);
@@ -60,11 +70,21 @@ public class ImmutableArrayList<T> implements ImmutableList<T> {
 
     @Override
     public T get(int index) {
+        if (this.isEmpty() || index >= this.elements.length)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
         return this.elements[index];
     }
 
     @Override
     public ImmutableArrayList<T> remove(int index) {
+        if (this.isEmpty() || index >= this.elements.length)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
         T[] newArray = (T[]) new Object[this.elements.length - 1];
 
         System.arraycopy(this.elements, 0, newArray, 0, index);
@@ -75,8 +95,16 @@ public class ImmutableArrayList<T> implements ImmutableList<T> {
 
     @Override
     public ImmutableArrayList<T> set(int index, T e) {
-        this.elements[index] = e;
-        return new ImmutableArrayList<T>(this.elements);
+        if (this.isEmpty() || index >= this.elements.length)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        T[] newArray = (T[]) new Object[this.elements.length];
+        System.arraycopy(this.elements, 0, newArray, 0, this.elements.length);
+
+        newArray[index] = e;
+        return new ImmutableArrayList<T>(newArray);
     }
 
     @Override
@@ -104,12 +132,16 @@ public class ImmutableArrayList<T> implements ImmutableList<T> {
 
     @Override
     public boolean isEmpty() {
-        return this.elements.length == 1;
+        return this.elements.length == 0;
     }
 
     @Override
     public T[] toArray() {
-        return this.elements;
+
+        T[] newArray = (T[]) new Object[this.elements.length];
+        System.arraycopy(this.elements, 0, newArray, 0, this.elements.length);
+
+        return newArray;
     }
 
     @Override

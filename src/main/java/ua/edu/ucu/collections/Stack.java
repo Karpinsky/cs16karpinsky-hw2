@@ -1,22 +1,46 @@
 package main.java.ua.edu.ucu.collections;
 import main.java.ua.edu.ucu.collections.immutable.ImmutableLinkedList;
 
-public class Stack {
+public class Stack<T> {
 
-    private ImmutableLinkedList stackData;
-    public Object peek()
+    private ImmutableLinkedList<T> queueData;
+
+    public Stack()
     {
-        return this.stackData.getLast();
+        this.queueData = new ImmutableLinkedList<T>();
     }
 
-    public Object pop()
+    public Stack(T[] initialDataArray)
     {
-        return this.stackData.removeLast();
+        this.queueData = new ImmutableLinkedList<T>(initialDataArray);
     }
 
-    public void push(Object e)
+    public T peek()
     {
-        this.stackData.add(e);
+        return this.queueData.getLast();
+    }
+
+    public T pop()
+    {
+        T removedData = this.peek();
+        this.queueData = this.queueData.removeLast();
+        return removedData;
+    }
+
+    public void push(T e)
+    {
+        this.queueData = this.queueData.add(e);
+    }
+
+    public T[] toArray()
+    {
+        return this.queueData.toArray();
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.queueData.toString();
     }
 
 }

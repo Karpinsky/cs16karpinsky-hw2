@@ -1,23 +1,46 @@
 package main.java.ua.edu.ucu.collections;
 import main.java.ua.edu.ucu.collections.immutable.ImmutableLinkedList;
 
-public class Queue {
+public class Queue<T> {
 
-    private ImmutableLinkedList queueData;
+    private ImmutableLinkedList<T> queueData;
 
-    public Object peek()
+    public Queue()
+    {
+        this.queueData = new ImmutableLinkedList<T>();
+    }
+
+    public Queue(T[] initialDataArray)
+    {
+        this.queueData = new ImmutableLinkedList<T>(initialDataArray);
+    }
+
+    public T peek()
     {
         return this.queueData.getFirst();
     }
 
-    public Object dequeue()
+    public T dequeue()
     {
-        return this.queueData.removeFirst();
+        T removedData = this.peek();
+        this.queueData = this.queueData.removeFirst();
+        return removedData;
     }
 
-    public void enqueue(Object e)
+    public void enqueue(T e)
     {
-        this.queueData.add(e);
+        this.queueData = this.queueData.add(e);
+    }
+
+    public T[] toArray()
+    {
+        return this.queueData.toArray();
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.queueData.toString();
     }
 
 }
