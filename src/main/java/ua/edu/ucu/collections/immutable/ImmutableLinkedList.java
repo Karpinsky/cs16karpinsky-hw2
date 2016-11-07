@@ -459,13 +459,15 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
     {
         Node<T> currentNode = this.rootNode;
 
-        String s = "";
+        StringBuilder buf = new StringBuilder();
         while (currentNode != null)
         {
-            s += currentNode.data.toString() + " -> ";
+            buf.append(currentNode.data.toString());
+            buf.append(" -> ");
             currentNode = currentNode.next;
         }
+        buf.append("null");
 
-        return s + "null";
+        return buf.toString();
     }
 }
