@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class ImmutableArrayList<T> implements ImmutableList<T> {
 
-    private T[] elements;
+    private final T[] elements;
 
     public ImmutableArrayList()
     {

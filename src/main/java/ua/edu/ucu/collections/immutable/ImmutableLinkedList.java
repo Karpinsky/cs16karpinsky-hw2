@@ -2,6 +2,21 @@ package main.java.ua.edu.ucu.collections.immutable;
 
 public class ImmutableLinkedList<T> implements ImmutableList<T> {
 
+    private static class Node<T> {
+
+        private final T data;
+        private Node<T> next;
+        private Node<T> previous;
+
+        private Node(T dataC)
+        {
+            this.data = dataC;
+            this.next = null;
+            this.previous = null;
+        }
+
+    }
+
     private final int count;
 
     private final Node<T> rootNode;
@@ -17,21 +32,34 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
 
     public ImmutableLinkedList(T rootData)
     {
-        this.rootNode = null;
-        this.pivotNode = null;
-        this.count = 0;
-        this.add(rootData);
+        this.rootNode = new Node<T>(rootData);
+        this.pivotNode = this.rootNode;
+        this.count = 1;
     }
 
     public ImmutableLinkedList(T[] initialArray)
     {
-        this.rootNode = null;
-        this.pivotNode = null;
-        this.count = 0;
-        for (int i = 0; i < initialArray.length; ++i)
+        if (initialArray.length < 1)
         {
-            this.add(initialArray[i]);
+            throw new IndexOutOfBoundsException();
         }
+
+        Node<T> newRootNode;
+        Node<T> newPivotNode;
+
+        newRootNode = new Node<T>(initialArray[0]);
+        Node<T> newCurrentNode = newRootNode;
+        for (int i = 1; i < initialArray.length; ++i)
+        {
+            newCurrentNode.next = new Node<T>(initialArray[i]);
+            newCurrentNode.next.previous = newCurrentNode;
+            newCurrentNode = newCurrentNode.next;
+        }
+        newPivotNode = newCurrentNode;
+
+        this.rootNode = newRootNode;
+        this.pivotNode = newPivotNode;
+        this.count = initialArray.length;
     }
 
     private ImmutableLinkedList(Node<T> root, Node<T> pivot, int count)
@@ -110,9 +138,10 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
             Node<T> newCurrentNode = newRootNode;
             Node<T> currentNode = this.rootNode;
 
-            int ndx = 0;
+            int ndx = 1;
             while (currentNode.next != null)
             {
+                System.out.println(ndx);
                 if (ndx == index)
                 {
                     newCurrentNode.next = new Node<T>(e);
@@ -219,7 +248,7 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
             Node<T> newCurrentNode = newRootNode;
             Node<T> currentNode = this.rootNode;
 
-            int ndx = 0;
+            int ndx = 1;
             while (currentNode.next != null)
             {
                 if (ndx == index)
@@ -245,11 +274,19 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
 
     public T getFirst()
     {
-       return this.rootNode.data;
+        if (this.rootNode == null)
+        {
+            throw new IndexOutOfBoundsException("The list is empty");
+        }
+        return this.rootNode.data;
     }
 
     public T getLast()
     {
+        if (this.pivotNode == null)
+        {
+            throw new IndexOutOfBoundsException("The list is empty");
+        }
         return this.pivotNode.data;
     }
 
@@ -330,7 +367,11 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
 
     @Override
     public ImmutableLinkedList<T> set(int index, T e) {
-        Node<T> setElement = new Node<T>(e);
+        if (this.isEmpty() || index >= this.count)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
         Node<T> newRootNode;
         Node<T> newPivotNode;
 
@@ -338,18 +379,22 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
         Node<T> newCurrentNode = newRootNode;
         Node<T> currentNode = this.rootNode;
 
-        int ndx = 0;
+        if (index == 0)
+        {
+            newRootNode = new Node<T>(e);
+            newCurrentNode = newRootNode;
+        }
+        int ndx = 1;
         while (currentNode.next != null)
         {
             if (ndx == index)
             {
-                setElement.next = newCurrentNode.next;
-                setElement.previous = newCurrentNode.previous;
-                newCurrentNode = new Node<T>(setElement.data);
-                newCurrentNode.next = setElement.next;
-                newCurrentNode.previous = setElement.previous;
-                setElement.next = null;
-                setElement.previous = null;
+                newCurrentNode.next = new Node<T>(e);
+                newCurrentNode.next.previous = newCurrentNode;
+                newCurrentNode = newCurrentNode.next;
+                currentNode = currentNode.next;
+                ndx++;
+                continue;
             }
             ndx++;
             currentNode = currentNode.next;
@@ -386,8 +431,8 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
     }
 
     @Override
-    public ImmutableList clear() {
-        return new ImmutableLinkedList();
+    public ImmutableLinkedList<T> clear() {
+        return new ImmutableLinkedList<T>();
     }
 
     @Override
@@ -412,7 +457,7 @@ public class ImmutableLinkedList<T> implements ImmutableList<T> {
     @Override
     public String toString()
     {
-        Node currentNode = this.rootNode;
+        Node<T> currentNode = this.rootNode;
 
         String s = "";
         while (currentNode != null)
